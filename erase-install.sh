@@ -12,8 +12,9 @@ erase-install.sh
 by Unbounce IT
 
 WARNING. This is a self-destruct script. Do not try it unless instructed to do so!
-
-Contact IT for details on use.
+Contact IT for details on use. This script was re-written to better manage the
+organic nature of our enterprise. While Apple is not Focused on the enterprise, we 
+took upon ourselves to create this in-house method of delivering excellence.
 
 
 This script will, run standalone.
@@ -286,8 +287,8 @@ check_for_swiftdialog_app() {
 # -----------------------------------------------------------------------------
 # Determine if the amount of free and purgable drive space is sufficient for 
 # the upgrade to take place.
-# The JavaScript osascript is used to give us the purgeable space as this is 
-# not available via any shell commands (Thanks to Pico). 
+# The JavaScript wraped in osascript is used to give us the purgeable space 
+# as this is not available via any shell commands. 
 # However, this does not work at the login window, so then we have to fall 
 # back to using df -h, which will not include purgeable space.
 # -----------------------------------------------------------------------------
@@ -332,10 +333,9 @@ check_free_space() {
 }
 
 # -----------------------------------------------------------------------------
-# Check the installer validity.
+# Checking the installer validity.
 # The Build number in the app Info.plist is often older than the advertised 
-# build number, so it's not a great check for checking the validity of the installer
-# if we are running --erase, where we might want to be using the same build.
+# build number, so it's not a great method for checking the validity of the installer
 # Since macOS 11, the actual build number is found in the SharedSupport.dmg in 
 # com_apple_MobileAsset_MacSoftwareUpdate.xml.
 # For older OSs we include a fallback to the older, less accurate 
@@ -826,7 +826,7 @@ create_pipe() {
 
 # -----------------------------------------------------------------------------
 # Show progress information in DEPNotify while the installer is being 
-# downloaded or prepared, or during reboot-delay, thanks to @andredb90.
+# downloaded or prepared, or during reboot-delay, thanks to UBC OpenSource Library.
 # -----------------------------------------------------------------------------
 dialog_progress() {
     last_progress_value=0
@@ -2188,136 +2188,9 @@ show_help() {
 
     Standard options for list, download, reinstall and erase: 
 
-    --list              List available updates only (don't download anything)
-    [no flags]          Finds latest current production, non-forked version
-                        of macOS, downloads it.
-    --move              Moves the downloaded macOS installer to $installer_directory
-    --reinstall         After download, reinstalls macOS without erasing the
-                        current system
-    --erase             After download, erases the current system
-                        and reinstalls macOS.
-    --confirm           Displays a confirmation dialog prior to erasing or reinstalling macOS.
-    --check-power       Checks for AC power if set.
-    --power-wait-limit NN
-                        Maximum seconds to wait for detection of AC power, if
-                        --check-power is set. Default is 60.
-    --check-fmm         Prompt the user to disable Find My Mac before proceeding, when using --erase
-    --fmm-wait-limit NN Maximum seconds to wait for removal of Find My Mac, if
-                        --check-fmm is set. Default is 300.
-
-    Options for filtering which installer to download/use:
-
-    --os X.Y            Finds a specific inputted OS version of macOS if available
-                        and downloads it if so. Will choose the latest matching build.
-    --version X.Y.Z     Finds a specific inputted minor version of macOS if available
-                        and downloads it if so. Will choose the latest matching build.
-    --build XYZ         Finds a specific inputted build of macOS if available
-                        and downloads it if so.
-    --sameos            Finds the version of macOS that matches the
-                        existing system version, downloads it. Most useful with --erase.
-    --samebuild         Finds the build of macOS that matches the
-                        existing system version, downloads it. Most useful with --erase.
-    --update            Checks that an existing installer on the system is still the most current
-                        valid build, and if not, it will delete it and download the current installer.
-    --replace-invalid   Checks that an existing installer on the system is still valid
-                        i.e. would successfully build on this system. If not, deletes it
-                        and downloads the current installer within the limits set by --os or --version.
-    --overwrite         Delete any existing macOS installer found in $installer_directory and download
-                        the current installer within the limits set by --os or --version.
-    --clear-cache-only  When used in conjunction with --overwrite, --update or --replace-invalid,
-                        the existing installer is removed but not replaced. This is useful
-                        for running the script after an upgrade to clear the working files.
-    --cleanup-after-use Creates a LaunchDaemon to delete $workdir after use. Mainly useful
-                        in conjunction with the --reinstall option.
-
-
-    Advanced options:
-
-    --newvolumename     If using the --erase option, lets you customize the name of the
-                        clean volume. Default is 'Macintosh HD'.
-    --preinstall-command 'some arbitrary command'
-                        Supply a shell command to run immediately prior to startosinstall
-                        running. An example might be 'jamf recon -department Spare'.
-                        Ensure that the command is in quotes.
-    --postinstall-command 'some arbitrary command'
-                        Supply a shell command to run immediately after startosinstall
-                        completes preparation, but before reboot.
-                        An example might be 'jamf recon -department Spare'.
-                        Ensure that the command is in quotes.
-    --catalog ...       Override the default catalog with one from a different OS 
-                        (overrides --seed/--seedprogram).
-    --catalogurl ...    Select a non-standard catalog URL (overrides --seed/--seedprogram).
-    --caching-server ...
-                        Set mist-cli to use a Caching Server, specifying the URL to the server.
-    --pkg               Creates a package from the installer. Ignored if --move, --erase or --reinstall is selected.
-                        Note that mist takes a long time to build the package from the complete installer, so
-                        this method is not recommended for normal workflows.
-    --keep-pkg          Retains a cached package if --move is used to extract an installer from it.
-    --fs                Uses full-screen windows for all stages, not just the
-                        preparation phase.
-    --no-fs             Replaces the full-screen dialog window with a smaller dialog,
-                        so you can still access the desktop while the script runs.
-    --beta              Include beta versions in the search. Works with the no-flag
-                        (i.e. automatic), --os and --version arguments.
-    --path /path/to     Overrides the destination of --move to a specified directory
-    --min-drive-space   Override the default minimum space required for startosinstall
-                        to run (45 GB).
-    --no-curl           Prevents the download of swiftDialog or mist in case your
-                        security team don't like it.
-    --no-timeout        The script will normally timeout if the installer has not successfully
-                        prepared after 1 hour. This extends that time limit to 1 day.
-
-    Extra packages:
-        startosinstall --eraseinstall can install packages after the new installation. 
-        By default, erase-install.sh will look for packages in $workdir/extras. 
-
-    --extras /path/to   Overrides the path to search for extra packages
-
-    Parameters for use with Apple Silicon Mac:
-        Note that startosinstall requires user authentication on AS Mac. The user
-        must have a Secure Token. This script checks for the Secure Token of the
-        supplied user. A dialog is used to supply the password, so
-        this script cannot be run at the login window or from remote terminal.
-
-    --max-password-attempts NN | infinite
-                        Overrides the default of 5 attempts to ask for the user's password. Using
-                        'infinite' will disable the Cancel button and asking until the password is
-                        successfully verified.
-
-    Experimental features:
-
-    --fetch-full-installer | --ffi | -f
-                        Obtain the installer using 'softwareupdate --fetch-full-installer' method instead of
-                        using mist
-    --list              List installers using 'softwareupdate --list-full-installers' when
-                        called with --fetch-full-installer
-    --seed ...          Select a non-standard seed program. This is only used with --fetch-full-installer 
-                        options.
-    --rebootdelay NN    Delays the reboot after preparation has finished by NN seconds (max 300)
-                        (--reinstall option only)
-    --kc                Keychain containing a user password (do not use the login keychain!!)
-    --kc-pass           Password to open the keychain
-    --kc-service        The name of the key containing the account and password
-    --credentials       A base64 credential set. Only works in conjunction with
-    --i-know-the-security-risks-and-i-still-want-to-supply-a-password-in-plain-text
-    --silent            Silent mode. No dialogs. Requires use of keychain for Apple Silicon 
-                        to provide a password, or the --credentials mode.
-    --quiet             Remove output from mist during installer download. Note that no progress 
-                        is shown.
-    --preservecontainer Preserves other volumes in your APFS container when using --erase
-    --set-securebootlevel 
-                        Resets Secure Boot Level to High when using --erase
-    --clear-firmware    Clears the firmware NVRAM variables when using --erase
-
-    Parameters useful in testing this script:
-
-    --test-run          Run through the script right to the end, but do not actually
-                        run the 'startosinstall' command. The command that would be
-                        run is shown in stdout.
-    --workdir /path/to  Supply an alternative working directory. The default is the same
-                        directory in which erase-install.sh is saved.
-    --cache-downloads   Caches mist downloads in a temporary directory in /private/tmp/com.ninxsoft.mist
-                        Useful when running repeated tests.
+     
+    --cTO-BE-WRITTEN    in /private/tmp/com.ninxsoft.mist
+                        repeat repeated tests.
 HELP
     exit
 }
@@ -2517,7 +2390,7 @@ trap "finish" EXIT
 # ensure the finish function is executed and an error code is returned when the script is TERMinated or INTerrupted
 trap "terminate" SIGINT SIGTERM
 
-# ensure some cleanup is done after startosinstall is run (thanks @frogor!)
+# ensure some cleanup is done after startosinstall is run 
 trap "post_prep_work" SIGUSR1
 
 # Safety mechanism to prevent unwanted wipe while testing
